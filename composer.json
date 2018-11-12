@@ -1,0 +1,15 @@
+{
+    "name": "solncebro/gendiff",
+    "authors": [
+        {
+            "name": "Andrei Kholkin",
+            "email": "virtual.exe@mail.ru"
+        }
+    ],
+    "bin": [
+        "bin/gendiff"
+      ],
+    "require": {
+        "docopt/docopt": "^1.0"
+    }
+}
