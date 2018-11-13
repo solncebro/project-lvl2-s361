@@ -16,9 +16,10 @@
         "bin/gendiff"
       ],
       "autoload": {
-        "files": ["src/Differ.php"
-                ]
-    },
+        "files": [
+            "src/Differ.php"
+            ]
+      },
     "require": {
         "docopt/docopt": "^1.0"
     },
