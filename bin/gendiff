@@ -25,3 +25,7 @@ DOC;
 $args = Docopt::handle($doc, array('version'=>'gendiff 1.0'));
 foreach ($args as $k=>$v)
     echo $k.': '.json_encode($v).PHP_EOL;
+
+use function GenDiff\Differ\genDiff;
+
+genDiff();
