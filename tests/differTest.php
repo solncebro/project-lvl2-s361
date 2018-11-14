@@ -5,27 +5,21 @@ namespace Differ\Tests;
 use PHPUnit\Framework\TestCase;
 use org\bovigo\vfs\vfsStream;
 
-class GenDiffTest extends TestCase
+class TestGenDiff extends TestCase
 {
-    public function testGenDiff()
+    /**
+     * @dataProvider additionProvider
+     */
+    public function testGenDiff($expected, $result, $file1, $file2)
     {
-        vfsStream::setup('home');
-        $file1 = vfsStream::url('home/before.json');
-        file_put_contents($file1, '{
-            "host": "hexlet.io",
-            "timeout": 50,
-            "proxy": "123.234.53.22"
-          }');
+        $this->assertEquals($expected, $result == \Differ\gendiff($file1, $file2));
+    }
 
-        $file2 = vfsStream::url('home/after.json');
-        file_put_contents($file2, '{
-            "timeout": 20,
-            "verbose": true,
-            "host": "hexlet.io"
-          }');
+    public function additionProvider()
+    {
+        $directory = __DIR__ . '/../';
 
-          
-        $result = [
+        $result = implode(PHP_EOL, [
             "{",
             "    host: hexlet.io",
             "  + timeout: 20",
@@ -33,14 +27,15 @@ class GenDiffTest extends TestCase
             "  - proxy: 123.234.53.22",
             "  + verbose: true",
             "}"
+        ]);
+        
+        return [
+            [true, $result, $directory . 'before.json', $directory . 'after.json'],
+            [false, $result, $directory . 'before.json', $directory . 'after2.json'],
+            [false, 'fake', $directory . 'before.json', $directory . 'after.json'],
+            [true, $result, $directory . 'before.yml', $directory . 'after.yml'],
+            [false, $result, $directory . 'before.yml', $directory . 'after2.yml'],
+            [false, 'fake', $directory . 'before.yml', $directory . 'after.yml']
         ];
-
-        $this->assertEquals(implode(PHP_EOL, $result), \Differ\gendiff($file1, $file2));
-
-        $file3 = "after2.json";
-        $this->assertNotEquals(implode(PHP_EOL, $result), \Differ\gendiff($file1, $file3));
-
-        $result2 = [];
-        $this->assertNotEquals(implode(PHP_EOL, $result2), \Differ\gendiff($file1, $file2));
     }
 }

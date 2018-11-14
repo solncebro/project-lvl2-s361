@@ -2,19 +2,16 @@
 
 namespace Differ;
 
-//  $pathToFile1 = "/Users/andreikholkin/Sites/gendiff/before.json";
-//  $pathToFile2 = "/Users/andreikholkin/Sites/gendiff/after.json";
-
-//  genDiff($pathToFile1, $pathToFile2);
+use Symfony\Component\Yaml\Yaml;
 
 function genDiff($pathToFile1, $pathToFile2)
 {
-    $filesArrays = readFileToArray($pathToFile1, $pathToFile2);
-    if (is_string($filesArrays)) {
-        return $filesArrays;
+    $filesContents = readFileToArray($pathToFile1, $pathToFile2);
+    if (is_string($filesContents)) {
+        return $filesContents;
     }
 
-    [$arrayFile1, $arrayFile2] = $filesArrays;
+    [$arrayFile1, $arrayFile2] = $filesContents;
 
     $arrayMergedKeys = array_keys(array_merge($arrayFile1, $arrayFile2));
 
@@ -47,15 +44,15 @@ function readFileToArray(string $pathToFile1, string $pathToFile2)
         return "Can't read one or two files. Terminating..." . PHP_EOL;
     }
 
-    $textFile1 = readJson($pathToFile1);
-    $textFile2 = readJson($pathToFile2);
+    [$textFile1, $extensionFile1] = readLinesAndExtension($pathToFile1);
+    [$textFile2, $extensionFile2] = readLinesAndExtension($pathToFile2);
 
     if (empty($textFile1) || empty($textFile2)) {
         return "One or two files are empty. Terminating..." . PHP_EOL;
     }
 
-    $arrayFile1 = json_decode($textFile1, true);
-    $arrayFile2 = json_decode($textFile2, true);
+    $arrayFile1 = decode($textFile1, $extensionFile1);
+    $arrayFile2 = decode($textFile2, $extensionFile2);
 
     if (is_null($arrayFile1) || is_null($arrayFile2)) {
         return "Can't decode JSON to array. Terminating..." . PHP_EOL;
@@ -67,9 +64,10 @@ function readFileToArray(string $pathToFile1, string $pathToFile2)
     return [$normalizedFile1, $normalizedFile2];
 }
 
-function readJson(string $pathToFile) : string
+function readLinesAndExtension(string $pathToFile)
 {
     $file = new \SplFileObject($pathToFile);
+    $extension = $file->getExtension();
     $text = '';
 
     while ($file->eof()) {
@@ -80,7 +78,19 @@ function readJson(string $pathToFile) : string
         $text .= $value;
     }
  
-    return $text;
+    return [$text, $extension];
+}
+
+function decode($textFile, $extensionFile)
+{
+    if ($extensionFile === 'json') {
+        return json_decode($textFile, true);
+    } elseif ($extensionFile === 'yml') {
+        $yaml = Yaml::parse($textFile);
+        return $yaml;
+    } else {
+        return "Unsuppoted file. Can't decoded to array. Terminating...";
+    }
 }
 
 function boolToString(array $arr) : array
