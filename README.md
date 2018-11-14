@@ -6,3 +6,4 @@
 
 1. Asciinema for 1st stage https://asciinema.org/a/OeountdX848rx1MLdacsbPgum
 2. Asciinema for 2nd stage https://asciinema.org/a/EChIWTDsM4L1BiWXxefhXxZaG
+3. Asciinema for 3rd stage https://asciinema.org/a/u8RtM5ftqxlua2IktDLCa9uxR
