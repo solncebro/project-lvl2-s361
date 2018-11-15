@@ -17,6 +17,7 @@
       ],
       "autoload": {
         "files": [
+            "src/Decoder.php",
             "src/Differ.php"
             ]
       },
