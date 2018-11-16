@@ -12,6 +12,6 @@ function decode($textFile, $extensionFile)
         $yaml = Yaml::parse($textFile);
         return $yaml;
     } else {
-        return "Unsupported file. Can't decoded to array. Terminating...";
+        return null;
     }
 }

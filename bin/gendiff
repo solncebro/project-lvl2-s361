@@ -1,4 +1,4 @@
-#!/usr/local/Cellar/php/7.2.11/bin/php
+#!/usr/bin/env php
 
 <?php
 
@@ -28,8 +28,4 @@ foreach ($args as $k => $v)
     echo $k.': '.json_encode($v).PHP_EOL;
 
 $diff = \Gendiff\Differ\genDiff($args['<firstFile>'], $args['<secondFile>']);
-
-// $pathToFile1 = "/Users/andreikholkin/Sites/gendiff/before.json";
-// $pathToFile2 = "/Users/andreikholkin/Sites/gendiff/after.json";
-// $diff = \Differ\genDiff($pathToFile1, $pathToFile2);
 print_r($diff);
