@@ -3,66 +3,72 @@
 namespace Gendiff\Differ;
 
 use function Gendiff\Decoder\decode;
-use Gendiff\Exceptions\ReadError;
-use Gendiff\Exceptions\FileEmpty;
-use Gendiff\Exceptions\DecodeError;
+use function Gendiff\Ast\makeAstDiff;
 
 function genDiff($pathToFile1, $pathToFile2)
 {
     $fileText1 = readFile($pathToFile1);
     $fileText2 = readFile($pathToFile2);
+    $diff = makeAstDiff($fileText1, $fileText2);
 
-    $arrayMergedKeys = array_keys(array_merge($fileText1, $fileText2));
+    $text = diffToText($diff);
 
-    $arr = array_reduce($arrayMergedKeys, function ($acc, $key) use ($fileText1, $fileText2) {
-        if (array_key_exists($key, $fileText2) && array_key_exists($key, $fileText1)) {
-            if ($fileText1[$key] === $fileText2[$key]) {
-                $value = boolToString($fileText1[$key]);
-                $acc[] = "    {$key}: {$value}";
-                return $acc;
-            }
-        }
-
-        if (array_key_exists($key, $fileText2)) {
-            $value = boolToString($fileText2[$key]);
-            $acc[] = "  + {$key}: {$value}";
-        }
-
-        if (array_key_exists($key, $fileText1)) {
-            $value = boolToString($fileText1[$key]);
-            $acc[] = "  - {$key}: {$value}";
-        }
-
-        return $acc;
-    }, []);
-
-    return "{" . PHP_EOL . implode(PHP_EOL, $arr) . PHP_EOL . "}";
+    return '{' . PHP_EOL . $text . '}' . PHP_EOL;
 }
 
 function readFile(string $pathToFile)
 {
     if (!is_readable($pathToFile)) {
-        throw new ReadError("Can't read file {$pathToFile}. Terminating..." . PHP_EOL);
+        throw new \Exception("Can't read file {$pathToFile}. Terminating..." . PHP_EOL);
     }
 
     $textFile = file_get_contents($pathToFile);
     if (empty($textFile)) {
-        throw new FileEmpty("The file {$pathToFile} is empty. Terminating..." . PHP_EOL);
+        throw new \Exception("The file {$pathToFile} is empty. Terminating..." . PHP_EOL);
     }
 
     $pathInfo = pathinfo($pathToFile);
     $decodedFile = decode($textFile, $pathInfo['extension']);
     if (is_null($decodedFile)) {
-        throw new DecodeError("Can't decode file {$pathToFile} to array. Terminating..." . PHP_EOL);
+        throw new \Exception("Can't decode file {$pathToFile} to array. Terminating..." . PHP_EOL);
     }
 
     return $decodedFile;
 }
 
-function boolToString($value) : string
+function diffToText($diff, $space = '')
 {
-    if (gettype($value) === 'boolean') {
-        return $value ? "true" : "false";
-    }
-    return $value;
+    $innerData = array_reduce($diff, function ($acc, $parent) use ($space) {
+        $type = $parent['type'];
+        $children = $parent['children'];
+
+        if ($type === 'removed' || $type === 'changed') {
+            $specialSpace = '  - ';
+        } elseif ($type === 'added') {
+            $specialSpace = '  + ';
+        } else {
+            $specialSpace = '    ';
+        }
+        
+        if ($parent['nested']) {
+            $acc[] = makeString($space, $specialSpace, $parent['key'], '{');
+            $acc[] = diffToText($children, $space . '    ');
+            $acc[] = makeString($space, '    ', '', '}');
+        } else {
+            $acc[] = makeString($space, $specialSpace, $parent['key'], $children);
+            if (!is_null($parent['newChildren'])) {
+                $acc[] = makeString($space, '  + ', $parent['key'], $parent['newChildren']);
+            }
+        }
+        
+        return $acc;
+    }, []);
+
+    return implode('', $innerData);
+}
+
+function makeString($space, $specialSpace, $key, $children)
+{
+    $colon = $key ? ': ' : '';
+    return $space . $specialSpace . $key . $colon . $children . PHP_EOL;
 }

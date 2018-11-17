@@ -17,12 +17,10 @@
       ],
       "autoload": {
         "files": [
+            "src/Ast.php",
             "src/Decoder.php",
             "src/Differ.php"
-            ],
-        "psr-4": {
-            "Gendiff\\Exceptions\\": "src/Exceptions"
-        }
+            ]
       },
     "require": {
         "docopt/docopt": "^1.0",

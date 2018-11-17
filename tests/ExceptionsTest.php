@@ -13,7 +13,7 @@ class ExceptionsTest extends TestCase
         try {
             $result = \Gendiff\Differ\gendiff('notExistFile.json', 'notExistFile2.json');
             $this->fail('ReadError exception expected, but not happen');
-        } catch (\Gendiff\Exceptions\ReadError $e) {
+        } catch (\Exception $e) {
             $this->assertTrue(true);
         }
     }
@@ -23,7 +23,7 @@ class ExceptionsTest extends TestCase
         try {
             $result = \Gendiff\Differ\gendiff($this->dir . 'before.json', $this->dir . 'empty.json');
             $this->fail('FileEmpty exception expected, but not happen');
-        } catch (\Gendiff\Exceptions\FileEmpty $e) {
+        } catch (\Exception $e) {
             $this->assertTrue(true);
         }
     }
@@ -33,7 +33,7 @@ class ExceptionsTest extends TestCase
         try {
             $result = \Gendiff\Differ\gendiff($this->dir . 'before.json', $this->dir . 'result.txt');
             $this->fail('DecodeError exception expected, but not happen');
-        } catch (\Gendiff\Exceptions\DecodeError $e) {
+        } catch (\Exception $e) {
             $this->assertTrue(true);
         }
     }
