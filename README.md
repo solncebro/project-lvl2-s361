@@ -9,3 +9,4 @@
 3. Asciinema for 3rd stage https://asciinema.org/a/u8RtM5ftqxlua2IktDLCa9uxR
 4. Asciinema for 4th stage https://asciinema.org/a/NXPhKLmLm7TqfdShJbbhqCI4Y
 5. Asciinema for 5th stage https://asciinema.org/a/umzkNnbFKmJziHtjeisI27ReT
+6. Asciinema for 6th stage https://asciinema.org/a/leDjJcOr4NKA4zyNSUhxmqE6i
