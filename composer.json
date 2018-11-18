@@ -17,6 +17,9 @@
       ],
       "autoload": {
         "files": [
+            "src/Format/Pretty.php",
+            "src/Format/Plain.php",
+            "src/Format/Json.php",
             "src/Ast.php",
             "src/Decoder.php",
             "src/Differ.php"

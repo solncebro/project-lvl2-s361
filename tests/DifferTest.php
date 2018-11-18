@@ -11,7 +11,7 @@ class DifferTest extends TestCase
      */
     public function testGenDiff($expected, $result, $filePath1, $filePath2, $format)
     {
-        //var_dump(\Gendiff\Differ\gendiff($filePath1, $filePath2, $format));
+        //var_dump(\Gendiff\Differ\gendiff($filePath1, $filePath2, $format), $result);
         $this->assertEquals($expected, $result === \Gendiff\Differ\gendiff($filePath1, $filePath2, $format));
     }
 
@@ -22,6 +22,7 @@ class DifferTest extends TestCase
         $result = file_get_contents($directory . 'result.txt');
         $result2 = file_get_contents($directory . 'result2.txt');
         $resultPlain = file_get_contents($directory . 'resultPlain.txt');
+        $resultJson = file_get_contents($directory . 'resultJson.json');
 
         return [
             [true, $result, $directory . 'before.json', $directory . 'after.json', 'pretty'],
@@ -37,7 +38,10 @@ class DifferTest extends TestCase
             [true, $resultPlain, $directory . 'before2.json', $directory . 'after2.json', 'plain'],
             [false, 'fake4', $directory . 'before2.json', $directory . 'after2.json', 'plain'],
             [true, $resultPlain, $directory . 'before2.yml', $directory . 'after2.yml', 'plain'],
-            [false, 'fake4', $directory . 'before2.yml', $directory . 'after2.yml', 'plain']
+            [false, 'fake4', $directory . 'before2.yml', $directory . 'after2.yml', 'plain'],
+            [true, $resultJson, $directory . 'before2.json', $directory . 'after2.json', 'json'],
+            [true, $resultJson, $directory . 'resultJson.json', $directory . 'resultJson.json', 'json'],
+            [false, 'fake4', $directory . 'before2.json', $directory . 'after2.json', 'json']
         ];
     }
 }
