@@ -5,14 +5,18 @@ namespace Gendiff\Differ;
 use function Gendiff\Decoder\decode;
 use function Gendiff\Ast\makeAstDiff;
 
-function genDiff($pathToFile1, $pathToFile2)
+function genDiff($pathToFile1, $pathToFile2, $format)
 {
     $fileText1 = readFile($pathToFile1);
     $fileText2 = readFile($pathToFile2);
     $diff = makeAstDiff($fileText1, $fileText2);
+    
+    if ($format === "plain") {
+        $text = diffToPlain($diff);
+        return implode(PHP_EOL, $text) . PHP_EOL;
+    }
 
-    $text = diffToText($diff);
-
+    $text = diffToPretty($diff);
     return '{' . PHP_EOL . $text . '}' . PHP_EOL;
 }
 
@@ -36,9 +40,9 @@ function readFile(string $pathToFile)
     return $decodedFile;
 }
 
-function diffToText($diff, $space = '')
+function diffToPretty($diff, $space = '')
 {
-    $innerData = array_reduce($diff, function ($acc, $parent) use ($space) {
+    $structuredData = array_reduce($diff, function ($acc, $parent) use ($space) {
         $type = $parent['type'];
         $children = $parent['children'];
 
@@ -52,7 +56,7 @@ function diffToText($diff, $space = '')
         
         if ($parent['nested']) {
             $acc[] = makeString($space, $specialSpace, $parent['key'], '{');
-            $acc[] = diffToText($children, $space . '    ');
+            $acc[] = diffToPretty($children, $space . '    ');
             $acc[] = makeString($space, '    ', '', '}');
         } else {
             $acc[] = makeString($space, $specialSpace, $parent['key'], $children);
@@ -64,11 +68,46 @@ function diffToText($diff, $space = '')
         return $acc;
     }, []);
 
-    return implode('', $innerData);
+    return implode('', $structuredData);
 }
 
 function makeString($space, $specialSpace, $key, $children)
 {
     $colon = $key ? ': ' : '';
     return $space . $specialSpace . $key . $colon . $children . PHP_EOL;
+}
+
+function diffToPlain($diff, $parentPath = [])
+{
+    $actionMessages = array_reduce($diff, function ($acc, $parent) use ($parentPath) {
+        $type = $parent['type'];
+        $children = $parent['children'];
+        $parentPath[] = $parent['key'];
+        
+        if ($type === 'unchanged') {
+            if (!$parent['nested']) {
+                return $acc;
+            }
+
+            $acc = array_merge($acc, diffToPlain($children, $parentPath));
+        } else {
+            if ($type === 'added') {
+                if ($parent['nested']) {
+                    $children = 'complex value';
+                }
+                $details = " with value: '{$children}'";
+            } elseif ($type === 'changed') {
+                $details = ". From '{$children}' to '{$parent['newChildren']}'";
+            } else {
+                $details = "";
+            }
+
+            $path = implode(".", $parentPath);
+            $acc[] = "Property '{$path}' was {$type}{$details}";
+        }
+        
+        return $acc;
+    }, []);
+
+    return $actionMessages;
 }
