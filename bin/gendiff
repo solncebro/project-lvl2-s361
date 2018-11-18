@@ -28,6 +28,4 @@ foreach ($args as $k => $v)
     echo $k.': '.json_encode($v).PHP_EOL;
 
 $diff = \Gendiff\Differ\genDiff($args['<firstFile>'], $args['<secondFile>'], $args['--format']);
-// var_dump($diff);
-// var_dump(json_decode($diff, true));
 print_r($diff);

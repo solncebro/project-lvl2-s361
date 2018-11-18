@@ -1,6 +1,6 @@
 <?php
 
-namespace Gendiff\Differ\Format;
+namespace Gendiff\Differ\Formatters;
 
 function diffToPretty($diff, $space = '')
 {
@@ -8,14 +8,19 @@ function diffToPretty($diff, $space = '')
         $type = $parent['type'];
         $children = $parent['children'];
 
-        if ($type === 'removed' || $type === 'changed') {
-            $specialSpace = '  - ';
-        } elseif ($type === 'added') {
-            $specialSpace = '  + ';
-        } else {
-            $specialSpace = '    ';
+        switch ($type) {
+            case 'unchanged':
+                $specialSpace = '    ';
+                break;
+            case 'added':
+                $specialSpace = '  + ';
+                break;
+            case 'removed':
+            case 'changed':
+                $specialSpace = '  - ';
+                break;
         }
-        
+
         if ($parent['nested']) {
             $acc[] = makeString($space, $specialSpace, $parent['key'], '{');
             $acc[] = diffToPretty($children, $space . '    ');

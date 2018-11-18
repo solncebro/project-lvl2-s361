@@ -4,14 +4,14 @@ namespace Gendiff\Decoder;
 
 use Symfony\Component\Yaml\Yaml;
 
-function decode($textFile, $extensionFile)
+function decode($content, $contentType)
 {
-    if ($extensionFile === 'json') {
-        return json_decode($textFile, true);
-    } elseif ($extensionFile === 'yml') {
-        $yaml = Yaml::parse($textFile);
+    if ($contentType === 'json') {
+        return json_decode($content, true);
+    } elseif ($contentType === 'yml') {
+        $yaml = Yaml::parse($content);
         return $yaml;
     } else {
-        return null;
+        throw new \Exception("Unsupported content type {$contentType}. Terminating..." . PHP_EOL);
     }
 }

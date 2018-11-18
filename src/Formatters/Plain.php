@@ -1,6 +1,6 @@
 <?php
 
-namespace Gendiff\Differ\Format;
+namespace Gendiff\Differ\Formatters;
 
 function diffToPlain($diff, $parentPath = [])
 {
@@ -9,27 +9,28 @@ function diffToPlain($diff, $parentPath = [])
         $children = $parent['children'];
         $parentPath[] = $parent['key'];
         
-        if ($type === 'unchanged') {
-            if (!$parent['nested']) {
+        $details = "";
+        
+        switch ($type) {
+            case 'unchanged':
+                if (!$parent['nested']) {
+                    return $acc;
+                }
+                $acc = array_merge($acc, diffToPlain($children, $parentPath));
                 return $acc;
-            }
-
-            $acc = array_merge($acc, diffToPlain($children, $parentPath));
-        } else {
-            if ($type === 'added') {
+            case 'added':
                 if ($parent['nested']) {
                     $children = 'complex value';
                 }
                 $details = " with value: '{$children}'";
-            } elseif ($type === 'changed') {
+                break;
+            case 'changed':
                 $details = ". From '{$children}' to '{$parent['newChildren']}'";
-            } else {
-                $details = "";
-            }
-
-            $path = implode(".", $parentPath);
-            $acc[] = "Property '{$path}' was {$type}{$details}";
+                break;
         }
+
+        $path = implode(".", $parentPath);
+        $acc[] = "Property '{$path}' was {$type}{$details}";
         
         return $acc;
     }, []);

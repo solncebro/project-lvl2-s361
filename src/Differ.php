@@ -5,40 +5,44 @@ namespace Gendiff\Differ;
 use function Gendiff\Decoder\decode;
 use function Gendiff\Ast\makeAstDiff;
 
-function genDiff($pathToFile1, $pathToFile2, $format)
+function genDiff($filePath1, $filePath2, $format = 'pretty')
 {
-    $fileText1 = readFile($pathToFile1);
-    $fileText2 = readFile($pathToFile2);
-    $diff = makeAstDiff($fileText1, $fileText2);
+    $data1 = getData($filePath1);
+    $data2 = getData($filePath2);
+    $diff = makeAstDiff($data1, $data2);
     
-    if (mb_strtolower($format) === "plain") {
-        $text = \Gendiff\Differ\Format\diffToPlain($diff);
-        return implode(PHP_EOL, $text) . PHP_EOL;
-    } elseif (mb_strtolower($format) === "json") {
-        $data = \Gendiff\Differ\Format\diffToJson($diff);
-        return json_encode($data);
-    }
-
-    $text = \Gendiff\Differ\Format\diffToPretty($diff);
-    return '{' . PHP_EOL . $text . '}' . PHP_EOL;
+    return convertDiff($diff, $format);
 }
 
-function readFile(string $pathToFile)
+function convertDiff($diff, $format)
 {
-    if (!is_readable($pathToFile)) {
-        throw new \Exception("Can't read file {$pathToFile}. Terminating..." . PHP_EOL);
+    if (mb_strtolower($format) === "plain") {
+        $text = \Gendiff\Differ\Formatters\diffToPlain($diff);
+        return implode(PHP_EOL, $text) . PHP_EOL;
+    } elseif (mb_strtolower($format) === "json") {
+        $data = \Gendiff\Differ\Formatters\diffToJson($diff);
+        return json_encode($data);
+    } elseif (mb_strtolower($format) === "pretty") {
+        $text = \Gendiff\Differ\Formatters\diffToPretty($diff);
+        return '{' . PHP_EOL . $text . '}' . PHP_EOL;
     }
 
-    $textFile = file_get_contents($pathToFile);
-    if (empty($textFile)) {
-        throw new \Exception("The file {$pathToFile} is empty. Terminating..." . PHP_EOL);
+    throw new \Exception("Unsupported gendiff --format {$format}. Terminating..." . PHP_EOL);
+}
+
+function getData(string $filePath)
+{
+    if (!is_readable($filePath)) {
+        throw new \Exception("Can't read file {$filePath}. Terminating..." . PHP_EOL);
     }
 
-    $pathInfo = pathinfo($pathToFile);
-    $decodedFile = decode($textFile, $pathInfo['extension']);
-    if (is_null($decodedFile)) {
-        throw new \Exception("Can't decode file {$pathToFile} to array. Terminating..." . PHP_EOL);
+    $content = file_get_contents($filePath);
+    if (empty($content)) {
+        throw new \Exception("The file {$filePath} is empty. Terminating..." . PHP_EOL);
     }
 
-    return $decodedFile;
+    $pathInfo = pathinfo($filePath);
+    $decodedContent = decode($content, $pathInfo['extension']);
+
+    return $decodedContent;
 }

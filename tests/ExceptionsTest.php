@@ -28,11 +28,22 @@ class ExceptionsTest extends TestCase
         }
     }
 
-    public function testDecodeError()
+    public function testUnsupportedType()
     {
         try {
             $result = \Gendiff\Differ\gendiff($this->dir . 'before.json', $this->dir . 'result.txt', 'pretty');
-            $this->fail('DecodeError exception expected, but not happen');
+            $this->fail('UnsupportedFormat exception expected, but not happen');
+        } catch (\Exception $e) {
+            $this->assertTrue(true);
+        }
+    }
+
+
+    public function testUnsupportedFormat()
+    {
+        try {
+            $result = \Gendiff\Differ\gendiff($this->dir . 'before.json', $this->dir . 'after.json', 'exe');
+            $this->fail('UnsupportedFormat exception expected, but not happen');
         } catch (\Exception $e) {
             $this->assertTrue(true);
         }
