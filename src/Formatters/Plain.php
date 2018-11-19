@@ -2,34 +2,31 @@
 
 namespace Gendiff\Differ\Formatters;
 
-function diffToPlain($diff, $parentPath = [])
+function diffToPlain($diff, $nodePath = [])
 {
-    $actionMessages = array_reduce($diff, function ($acc, $parent) use ($parentPath) {
-        $type = $parent['type'];
-        $children = $parent['children'];
-        $parentPath[] = $parent['key'];
-        
-        $details = "";
+    $actionMessages = array_reduce($diff, function ($acc, $node) use ($nodePath) {
+        $type = $node['type'];
+        $nodePath[] = $node['name'];
         
         switch ($type) {
-            case 'unchanged':
-                if (!$parent['nested']) {
-                    return $acc;
-                }
-                $acc = array_merge($acc, diffToPlain($children, $parentPath));
+            case 'nested':
+                $acc = array_merge($acc, diffToPlain($node['oldValue'], $nodePath));
                 return $acc;
+            case 'removed':
+                $details = "";
+                break;
             case 'added':
-                if ($parent['nested']) {
-                    $children = 'complex value';
-                }
-                $details = " with value: '{$children}'";
+                $value = is_array($node['newValue']) ? 'complex value' : $node['newValue'];
+                $details = " with value: '{$value}'";
                 break;
             case 'changed':
-                $details = ". From '{$children}' to '{$parent['newChildren']}'";
+                $details = ". From '{$node['oldValue']}' to '{$node['newValue']}'";
                 break;
+            default:
+                return $acc;
         }
 
-        $path = implode(".", $parentPath);
+        $path = implode(".", $nodePath);
         $acc[] = "Property '{$path}' was {$type}{$details}";
         
         return $acc;

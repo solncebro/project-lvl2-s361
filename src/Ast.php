@@ -7,14 +7,21 @@ function boolToString($value)
     return $value ? "true" : "false";
 }
 
-function makeNode($type, $key, $nested, $children, $newChildren)
+function makeNode($type, $name, $oldValue, $newValue)
 {
+    if (is_array($newValue) && $type === 'added') {
+        $newValue = makeAstDiff($newValue, $newValue);
+    }
+
+    if (is_array($oldValue) && $type === 'removed') {
+        $oldValue = makeAstDiff($oldValue, $oldValue);
+    }
+
     return [
         'type' => $type,
-        'key' => $key,
-        'nested' => $nested,
-        'children' => is_bool($children) ? boolToString($children) : $children,
-        'newChildren' => is_bool($newChildren) ? boolToString($newChildren) : $newChildren
+        'name' => $name,
+        'oldValue' => is_bool($oldValue) ? boolToString($oldValue) : $oldValue,
+        'newValue' => is_bool($newValue) ? boolToString($newValue) : $newValue
     ];
 }
 
@@ -29,47 +36,29 @@ function makeAstDiff($dataBefore, $dataAfter)
 
 function makeDiff($key, $dataBefore, $dataAfter)
 {
-    $nested = false;
-    $newChildren = null;
+    $children = null;
 
     if (!array_key_exists($key, $dataBefore) && array_key_exists($key, $dataAfter)) {
-        $action = 'added';
-
-        if (is_array($dataAfter[$key])) {
-            $nested = true;
-            $children = makeAstDiff($dataAfter[$key], $dataAfter[$key]);
-        } else {
-            $children = $dataAfter[$key];
-        }
+        $type = 'added';
+        $oldValue = null;
+        $newValue = $dataAfter[$key];
     } elseif (array_key_exists($key, $dataBefore) && !array_key_exists($key, $dataAfter)) {
-        $action = 'removed';
-        
-        if (is_array($dataBefore[$key])) {
-            $nested = true;
-            $children = makeAstDiff($dataBefore[$key], $dataBefore[$key]);
-        } else {
-            $children = $dataBefore[$key];
-        }
+        $type = 'removed';
+        $oldValue = $dataBefore[$key];
+        $newValue = null;
+    } elseif (is_array($dataBefore[$key]) && is_array($dataAfter[$key])) {
+        $type = 'nested';
+        $oldValue = makeAstDiff($dataBefore[$key], $dataAfter[$key]);
+        $newValue = null;
+    } elseif ($dataBefore[$key] === $dataAfter[$key]) {
+        $type = 'unchanged';
+        $oldValue = $dataBefore[$key];
+        $newValue = null;
     } else {
-        if (is_array($dataBefore[$key]) && is_array($dataAfter[$key])) {
-            $action = 'unchanged';
-            $nested = true;
-            $children = makeAstDiff($dataBefore[$key], $dataAfter[$key]);
-        } elseif ($dataBefore[$key] === $dataAfter[$key]) {
-            $action = 'unchanged';
-
-            if (is_array($dataBefore[$key])) {
-                $nested = true;
-                $children = makeAstDiff($dataBefore[$key], $dataBefore[$key]);
-            } else {
-                $children = $dataBefore[$key];
-            }
-        } else {
-            $action = 'changed';
-            $children = $dataBefore[$key];
-            $newChildren = $dataAfter[$key];
-        }
+        $type = 'changed';
+        $oldValue = $dataBefore[$key];
+        $newValue = $dataAfter[$key];
     }
     
-    return makeNode($action, $key, $nested, $children, $newChildren);
+    return makeNode($type, $key, $oldValue, $newValue);
 }

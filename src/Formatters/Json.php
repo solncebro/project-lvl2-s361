@@ -2,21 +2,21 @@
 
 namespace Gendiff\Differ\Formatters;
 
-function diffToJson($diff, $space = '')
+function diffToJson($diff)
 {
-    $structuredData = array_reduce($diff, function ($acc, $parent) use ($space) {
-        $children = $parent['children'];
+    $structuredData = array_reduce($diff, function ($acc, $node) {
+        $key = $node['name'];
         
-        if (!is_null($parent['newChildren'])) {
-            $children = $parent['newChildren'];
+        switch ($node['type']) {
+            case 'nested':
+            case 'unchanged':
+                $acc[$key] = is_array($node['oldValue']) ? diffToJson($node['oldValue']) : $node['oldValue'];
+                break;
+            case 'changed':
+            case 'added':
+                $acc[$key] = is_array($node['newValue']) ? diffToJson($node['newValue']) : $node['newValue'];
+                break;
         }
-        
-        if ($parent['nested']) {
-            $children = diffToJson($children);
-        }
-
-        $acc[$parent['key']] = $children;
-
         return $acc;
     }, []);
 

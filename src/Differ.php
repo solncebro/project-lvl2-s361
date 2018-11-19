@@ -10,11 +10,11 @@ function genDiff($filePath1, $filePath2, $format = 'pretty')
     $data1 = getData($filePath1);
     $data2 = getData($filePath2);
     $diff = makeAstDiff($data1, $data2);
-    
-    return convertDiff($diff, $format);
+
+    return format($diff, $format);
 }
 
-function convertDiff($diff, $format)
+function format($diff, $format)
 {
     if (mb_strtolower($format) === "plain") {
         $text = \Gendiff\Differ\Formatters\diffToPlain($diff);
