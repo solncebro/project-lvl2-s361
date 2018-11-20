@@ -9,14 +9,6 @@ function boolToString($value)
 
 function makeNode($type, $name, $oldValue, $newValue, $children = null)
 {
-    if (is_array($newValue) && $type === 'added') {
-        $children = makeAstDiff($newValue, $newValue);
-    }
-    
-    if (is_array($oldValue) && $type === 'removed') {
-        $children = makeAstDiff($oldValue, $oldValue);
-    }
-
     return [
         'type' => $type,
         'name' => $name,
@@ -50,8 +42,8 @@ function makeDiff($key, $dataBefore, $dataAfter)
     } elseif (is_array($dataBefore[$key]) && is_array($dataAfter[$key])) {
         $type = 'nested';
         $children = makeAstDiff($dataBefore[$key], $dataAfter[$key]);
-        $oldValue = $dataBefore[$key];
-        $newValue = $dataAfter[$key];
+        $oldValue = null;
+        $newValue = null;
     } elseif ($dataBefore[$key] === $dataAfter[$key]) {
         $type = 'unchanged';
         $oldValue = $dataBefore[$key];

@@ -38,9 +38,7 @@ class DifferTest extends TestCase
             [true, $resultPlain, $directory . 'before2.json', $directory . 'after2.json', 'plain'],
             [false, 'fake4', $directory . 'before2.json', $directory . 'after2.json', 'plain'],
             [true, $resultPlain, $directory . 'before2.yml', $directory . 'after2.yml', 'plain'],
-            [false, 'fake4', $directory . 'before2.yml', $directory . 'after2.yml', 'plain'],
-            [true, $resultJson, $directory . 'before2.json', $directory . 'after2.json', 'json'],
-            [false, 'fake4', $directory . 'before2.json', $directory . 'after2.json', 'json']
+            [false, 'fake4', $directory . 'before2.yml', $directory . 'after2.yml', 'plain']
         ];
     }
 }

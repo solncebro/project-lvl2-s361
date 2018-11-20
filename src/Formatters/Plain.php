@@ -16,7 +16,7 @@ function diffToPlain($diff, $nodePath = [])
                 $details = "";
                 break;
             case 'added':
-                $value = is_array($node['children']) ? 'complex value' : $node['newValue'];
+                $value = is_array($node['newValue']) ? 'complex value' : $node['newValue'];
                 $details = " with value: '{$value}'";
                 break;
             case 'changed':
