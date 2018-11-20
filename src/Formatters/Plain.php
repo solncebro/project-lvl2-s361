@@ -10,13 +10,13 @@ function diffToPlain($diff, $nodePath = [])
         
         switch ($type) {
             case 'nested':
-                $acc = array_merge($acc, diffToPlain($node['oldValue'], $nodePath));
+                $acc = array_merge($acc, diffToPlain($node['children'], $nodePath));
                 return $acc;
             case 'removed':
                 $details = "";
                 break;
             case 'added':
-                $value = is_array($node['newValue']) ? 'complex value' : $node['newValue'];
+                $value = is_array($node['children']) ? 'complex value' : $node['newValue'];
                 $details = " with value: '{$value}'";
                 break;
             case 'changed':

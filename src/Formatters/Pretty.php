@@ -7,20 +7,20 @@ function diffToPretty($diff, $space = '')
     $structuredData = array_reduce($diff, function ($acc, $node) use ($space) {
         switch ($node['type']) {
             case 'nested':
-                $acc[] = addNestedStrings($space, '    ', $node['name'], $node['oldValue']);
+                $acc[] = addStringElement($space, '    ', $node, $node['oldValue']);
                 break;
             case 'unchanged':
-                $acc[] = makeString($space, '    ', $node['name'], $node['oldValue']);
+                $acc[] = addStringElement($space, '    ', $node, $node['oldValue']);
                 break;
             case 'added':
-                $acc[] = makeString($space, '  + ', $node['name'], $node['newValue']);
+                $acc[] = addStringElement($space, '  + ', $node, $node['newValue']);
                 break;
             case 'removed':
-                $acc[] = makeString($space, '  - ', $node['name'], $node['oldValue']);
+                $acc[] = addStringElement($space, '  - ', $node, $node['oldValue']);
                 break;
             case 'changed':
-                $acc[] = makeString($space, '  - ', $node['name'], $node['oldValue']);
-                $acc[] = makeString($space, '  + ', $node['name'], $node['newValue']);
+                $acc[] = addStringElement($space, '  - ', $node, $node['oldValue']);
+                $acc[] = addStringElement($space, '  + ', $node, $node['newValue']);
                 break;
         }
 
@@ -32,20 +32,20 @@ function diffToPretty($diff, $space = '')
 
 function makeString($space, $specialSpace, $name, $children)
 {
-    if (is_array($children)) {
-        return addNestedStrings($space, $specialSpace, $name, $children);
-    }
-
     $colon = $name ? ': ' : '';
     return $space . $specialSpace . $name . $colon . $children . PHP_EOL;
 }
 
-function addNestedStrings($space, $specialSpace, $name, $children)
+function addStringElement($space, $specialSpace, $node, $value)
 {
     $acc = [];
-    $acc[] = makeString($space, $specialSpace, $name, '{');
-    $acc[] = diffToPretty($children, $space . '    ');
-    $acc[] = makeString($space, '    ', '', '}');
+    if (!is_array($node['children'])) {
+        $acc[] = makeString($space, $specialSpace, $node['name'], $value);
+    } else {
+        $acc[] = makeString($space, $specialSpace, $node['name'], '{');
+        $acc[] = diffToPretty($node['children'], $space . '    ');
+        $acc[] = makeString($space, '    ', '', '}');
+    }
     
     return implode('', $acc);
 }

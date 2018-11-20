@@ -16,15 +16,14 @@ function genDiff($filePath1, $filePath2, $format = 'pretty')
 
 function format($diff, $format)
 {
-    if (mb_strtolower($format) === "plain") {
+    if (mb_strtolower($format) === "pretty") {
+        $text = \Gendiff\Differ\Formatters\diffToPretty($diff);
+        return '{' . PHP_EOL . $text . '}' . PHP_EOL;
+    } elseif (mb_strtolower($format) === "plain") {
         $text = \Gendiff\Differ\Formatters\diffToPlain($diff);
         return implode(PHP_EOL, $text) . PHP_EOL;
     } elseif (mb_strtolower($format) === "json") {
-        $data = \Gendiff\Differ\Formatters\diffToJson($diff);
-        return json_encode($data);
-    } elseif (mb_strtolower($format) === "pretty") {
-        $text = \Gendiff\Differ\Formatters\diffToPretty($diff);
-        return '{' . PHP_EOL . $text . '}' . PHP_EOL;
+        return json_encode($diff);
     }
 
     throw new \Exception("Unsupported gendiff --format {$format}. Terminating..." . PHP_EOL);

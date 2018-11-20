@@ -19,7 +19,6 @@
         "files": [
             "src/Formatters/Pretty.php",
             "src/Formatters/Plain.php",
-            "src/Formatters/Json.php",
             "src/Ast.php",
             "src/Decoder.php",
             "src/Differ.php"
